@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.13.35931.197
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClassDependencyVisualizer", "ClassDependencyVisualizer\ClassDependencyVisualizer.csproj", "{A5791A43-2CEC-4491-9BB2-1E59471EBE93}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DependencyAnalyzer", "ClassDependencyModel\DependencyAnalyzer.csproj", "{3203D255-17E6-4145-DEC4-9FD957ECFA9A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A5791A43-2CEC-4491-9BB2-1E59471EBE93}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A5791A43-2CEC-4491-9BB2-1E59471EBE93}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A5791A43-2CEC-4491-9BB2-1E59471EBE93}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A5791A43-2CEC-4491-9BB2-1E59471EBE93}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3203D255-17E6-4145-DEC4-9FD957ECFA9A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3203D255-17E6-4145-DEC4-9FD957ECFA9A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3203D255-17E6-4145-DEC4-9FD957ECFA9A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3203D255-17E6-4145-DEC4-9FD957ECFA9A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {509B7E3F-D56B-4374-B91D-05572A152A02}
+	EndGlobalSection
+EndGlobal
