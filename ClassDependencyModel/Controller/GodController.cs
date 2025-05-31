@@ -11,6 +11,9 @@ namespace DependencyAnalyzer.Controller
 {
     /// <summary>
     /// 邪悪なる神クラス
+    /// ああああああああああああああああああああああああああああああああああああああああああああああああああああ
+    /// いいいいいいいいいいいい
+    /// いいいいいいいいいいいいいいいいいいいいいいいいいいい
     /// </summary>
     public class GodController
     {
@@ -42,7 +45,7 @@ namespace DependencyAnalyzer.Controller
         public async Task<ClassNameSet> AnalyzeClassesAsync(string sorcePath)
         {
 
-            classMap = await solutionAnalyzer.AnalyzeAsync(sorcePath);
+            classMap = await solutionAnalyzer.AnalyzeAsync(sorcePath).ConfigureAwait(false);
 
             Console.WriteLine("全クラス数: " + classMap.Count);
 

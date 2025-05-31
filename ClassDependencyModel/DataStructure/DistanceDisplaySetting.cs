@@ -12,18 +12,22 @@ namespace DependencyAnalyzer.DataStructure
         public string RootName { get; private set; }
         public int DistanceDisplayDependency { get; private set; }
         public int DistanceDisplayDependent { get; private set; }
-        public bool DisplaySammary {  get; private set; }
+        public bool DisplaySummary {  get; private set; }
+        public bool DisplayFieldAndMethod { get; private set; }
+
 
         public DistanceDisplaySetting(
             string rootName,
             int distanceDisplayDependency,
             int distanceDisplayDependent,
-            bool displaySammary)
+            bool displaySummary,
+            bool displayFieldAndMethod)
         {
             RootName = rootName;
             DistanceDisplayDependency = distanceDisplayDependency;
             DistanceDisplayDependent = distanceDisplayDependent;
-            DisplaySammary = displaySammary;
+            DisplaySummary = displaySummary;
+            DisplayFieldAndMethod = displayFieldAndMethod;
         }
     }
 

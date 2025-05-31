@@ -35,14 +35,15 @@ namespace DependencyAnalyzer.PlantUml
         }
 
         public void Render(StringBuilder sb, Dictionary<string, string> classNameMap,
-                   Dictionary<string, ClassDependency> classMap, string rootClassName = null, int indent = 0, bool displaySammary = false)
+                   Dictionary<string, ClassDependency> classMap, string rootClassName = null, int indent = 0,
+                   bool displaySummary = false, bool displyaFieldAndMethod = true)
         {
             string indentStr = new string(' ', indent * 2);
 
             foreach (var (ns, childNode) in Children)
             {
-                sb.AppendLine($"{indentStr}package \"{Escape(ns)}\" {{");
-                childNode.Render(sb, classNameMap, classMap, rootClassName, indent + 1, displaySammary);
+                sb.AppendLine($"{indentStr}package \"{Escape(ns)}[namepspace]\" {{");
+                childNode.Render(sb, classNameMap, classMap, rootClassName, indent + 1, displaySummary, displyaFieldAndMethod);
                 sb.AppendLine($"{indentStr}}}");
             }
 
@@ -56,38 +57,55 @@ namespace DependencyAnalyzer.PlantUml
 
                 sb.AppendLine($"{indentStr}{elementType} {Escape(shortName)}{colorSuffix} {{");
 
-                foreach (var field in classDependency.Fields)
+                if (displyaFieldAndMethod)
                 {
-                    sb.AppendLine($"{indentStr}  +{Escape(field)}");
-                }
+                    foreach (var field in classDependency.Fields)
+                    {
+                        sb.AppendLine($"{indentStr}  +{Escape(field)}");
+                    }
 
-                foreach (var method in classDependency.Methods)
+                    foreach (var method in classDependency.Methods)
+                    {
+                        sb.AppendLine($"{indentStr}  +{Escape(method)}()");
+                    }
+                }
+                else
                 {
-                    sb.AppendLine($"{indentStr}  +{Escape(method)}()");
+                    sb.AppendLine($"{indentStr}  +{classDependency.Fields.Count}");
+                    sb.AppendLine($"{indentStr}  +{classDependency.Methods.Count}()");
                 }
-
                 sb.AppendLine($"{indentStr}}}");
-
-                if (displaySammary && !string.IsNullOrWhiteSpace(classDependency.Sammary))
+                if (displaySummary && !string.IsNullOrWhiteSpace(classDependency.summary))
                 {
-                    var sanitizedSummary = classDependency.Sammary
+                    var sanitizedSummary = classDependency.summary
                         .Replace("\r", "")
                         .Replace("\"", "'");
 
                     sb.AppendLine($"{indentStr}note right of {Escape(shortName)}");
 
-                    var summaryLines = sanitizedSummary.Split('\n');
-                    foreach (var line in summaryLines)
+                    var lines = sanitizedSummary.Split('\n');
+                    foreach (var line in lines)
                     {
-                        sb.AppendLine($"{indentStr}    {line}");  
+                        var trimmedLine = line.Trim(); // 余計な空白を除
+                        foreach (var wrapped in WrapText(trimmedLine, 20))
+                        {
+                            sb.AppendLine($"{indentStr}    {wrapped}");  
+                        }
                     }
 
                     sb.AppendLine($"{indentStr}end note");
                 }
 
+
             }
         }
-
+        private static IEnumerable<string> WrapText(string text, int maxLineLength)
+        {
+            for (int i = 0; i < text.Length; i += maxLineLength)
+            {
+                yield return text.Substring(i, Math.Min(maxLineLength, text.Length - i));
+            }
+        }
 
         private string GetPlantUmlElementType(SymbolType symbolType)
         {

@@ -10,7 +10,7 @@ namespace DependencyAnalyzer.SolutionAna
             // RegisterMSBuild は外で呼ぶ前提
             var workspace = MSBuildWorkspace.Create();
             // エラー監視など含めて既存の処理を移行
-            return await workspace.OpenSolutionAsync(solutionPath);
+            return await workspace.OpenSolutionAsync(solutionPath).ConfigureAwait(false);
         }
     }
 }

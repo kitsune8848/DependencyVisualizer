@@ -42,17 +42,17 @@ namespace ClassDependencyVisualizer.Manager
             _selectedFilterMode = mode;
         }
 
-        public FilterResult ProcessFilter(IEnumerable<ClassNode> rootNodes, int forward, int backward, bool displaySammary)
+        public FilterResult ProcessFilter(IEnumerable<ClassNode> rootNodes, int forward, int backward, bool displaySummary, bool displayFieldAndMethod)
         {
             return _selectedFilterMode switch
             {
-                "Selection" => ProcessSelectionFilter(rootNodes, displaySammary),
-                "Distance" => ProcessDistanceFilter(rootNodes, forward, backward, displaySammary),
+                "Selection" => ProcessSelectionFilter(rootNodes, displaySummary, displayFieldAndMethod),
+                "Distance" => ProcessDistanceFilter(rootNodes, forward, backward, displaySummary, displayFieldAndMethod),
                 _ => FilterResult.Error("不明なフィルターモードです。")
             };
         }
 
-        private FilterResult ProcessSelectionFilter(IEnumerable<ClassNode> rootNodes, bool displaySammary)
+        private FilterResult ProcessSelectionFilter(IEnumerable<ClassNode> rootNodes, bool displaySummary, bool displayFieldAndMethod)
         {
             var selectedNames = GetCheckedClassNames(rootNodes.ToList(), "");
             if (selectedNames.Count == 0)
@@ -60,24 +60,22 @@ namespace ClassDependencyVisualizer.Manager
                 return FilterResult.Error("クラスを1つ以上選択してください。");
             }
 
-            var displaySetting = new SelectionDisplaySetting(selectedNames, displaySammary);
+            var displaySetting = new SelectionDisplaySetting(selectedNames, displaySummary, displayFieldAndMethod);
             var logMessage = $"{selectedNames.Count}個のクラスを出力しました";
 
             return FilterResult.Success(displaySetting, logMessage);
         }
 
-        private FilterResult ProcessDistanceFilter(IEnumerable<ClassNode> rootNodes, int forward, int backward, bool displaySammary)
+        private FilterResult ProcessDistanceFilter(IEnumerable<ClassNode> rootNodes, int forward, int backward, bool displaySummary, bool displayFieldAndMethod)
         {
-            // 距離の取得ロジックは元のコードから移植が必要
-            // 現在は簡略化した実装
             var selectedNames = GetCheckedClassNames(rootNodes.ToList(), "");
             if (selectedNames.Count != 1)
             {
                 return FilterResult.Error("距離フィルターは1つのクラスのみ選択してください。");
             }
 
-            var displaySetting = new DistanceDisplaySetting(selectedNames[0], forward, backward, displaySammary);
-            var logMessage = $"選択クラス: {selectedNames[0]}(依存先距離: {forward}、依存元距離: {backward})を出力しました。";
+            var displaySetting = new DistanceDisplaySetting(selectedNames[0], forward, backward, displaySummary, displayFieldAndMethod);
+            var logMessage = $"選択項目: {selectedNames[0]}(依存先距離: {forward}、依存元距離: {backward})を出力しました。";
 
             return FilterResult.Success(displaySetting, logMessage);
         }
@@ -90,7 +88,7 @@ namespace ClassDependencyVisualizer.Manager
             {
                 var fullPath = string.IsNullOrEmpty(prefix) ? node.Name : $"{prefix}.{node.Name}";
 
-                if (node.IsChecked && node.Children.Count == 0)
+                if (node.IsChecked)
                 {
                     var trimmed = fullPath.StartsWith("All.") ? fullPath.Substring(4) : fullPath;
                     list.Add(trimmed);

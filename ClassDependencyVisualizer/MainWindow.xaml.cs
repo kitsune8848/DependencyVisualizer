@@ -18,6 +18,9 @@ using DependencyAnalyzer.VSCodeView;
 using System.Text.RegularExpressions;
 using System.Windows.Threading;
 using ClassDependencyVisualizer.Manager;
+using System.Windows.Data;
+using Microsoft.Build.Tasks;
+using System.Xml.Linq;
 
 
 namespace ClassDependencyVisualizer
@@ -34,6 +37,8 @@ namespace ClassDependencyVisualizer
         private bool _isViewerOpen = false;
         private const string OutputFilePath = "output.puml";
         private DispatcherTimer _autoReloadTimer;
+        private string currentFilterMode = "Selection";
+
 
 
         private ObservableCollection<ClassNode> _rootNodes = new ObservableCollection<ClassNode>();
@@ -66,6 +71,8 @@ namespace ClassDependencyVisualizer
             _searchManager = new SearchManager();
             _filterManager = new FilterManager();
             _logManager = new LogManager(LogRichTextBox);
+
+            ShowDisplayMethodFieldCheckBox.IsChecked = true;
         }
 
         private void InitializeFromHistory()
@@ -120,19 +127,24 @@ namespace ClassDependencyVisualizer
         private void SearchButton_Click(object sender, RoutedEventArgs e)
         {
             var keyword = SearchTextBox.Text?.Trim() ?? "";
-            var hitCount = _searchManager.SearchAndHighlight(RootNodes, keyword);
 
             if (string.IsNullOrWhiteSpace(keyword))
             {
                 _logManager.LogInfo("検索キーワードが空です。");
+                _searchManager.ClearSearch(RootNodes);
+                return;
             }
-            else if (hitCount > 0)
+
+
+            var hitCount = _searchManager.SearchAndHighlight(RootNodes, keyword);
+            if (hitCount > 0)
             {
                 _logManager.LogInfo($"検索キーワード '{keyword}' に一致する項目が {hitCount} 件見つかりました。");
             }
             else
             {
                 _logManager.LogInfo($"検索キーワード '{keyword}' に一致する項目は見つかりませんでした。");
+                _searchManager.ClearSearch(RootNodes);
             }
         }
 
@@ -140,7 +152,8 @@ namespace ClassDependencyVisualizer
         private void ClearSearchButton_Click(object sender, RoutedEventArgs e)
         {
             SearchTextBox.Text = "";
-            _searchManager.SearchAndHighlight(RootNodes, "");
+            _searchManager.ClearSearch(RootNodes);
+
         }
 
         private void FilterMode_Checked(object sender, RoutedEventArgs e)
@@ -148,7 +161,59 @@ namespace ClassDependencyVisualizer
             if (sender is RadioButton rb && rb.Tag is string tag)
             {
                 _filterManager.SetFilterMode(tag);
+
                 DistanceFilterPanel.Visibility = (tag == "Distance") ? Visibility.Visible : Visibility.Collapsed;
+                currentFilterMode = tag;
+
+                bool propagate = tag == "Selection"; 
+                // ツリー内の全ノードに伝播モードを反映
+                foreach (var node in RootNodes)
+                {
+                    SetPropagateModeRecursive(node, propagate);
+                }
+            }
+        }
+
+        private void ClassNodeCheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            if (sender is CheckBox checkBox && checkBox.DataContext is ClassNode selectedNode)
+            {
+                // 一時的にイベントを外す
+                checkBox.Checked -= ClassNodeCheckBox_Checked;
+
+                try
+                {
+                    if (!selectedNode.PropagateCheckToChildren)
+                    {
+                        ClearCheck(RootNodes);
+                    }
+
+                    // 必ずチェックされている状態にする
+                    selectedNode.IsChecked = true;
+                }
+                finally
+                {
+                    // 再度イベントを追加（確実に戻す）
+                    checkBox.Checked += ClassNodeCheckBox_Checked;
+                }
+            }
+        }
+
+        private void ClearCheck(IEnumerable<ClassNode> nodes)
+        {
+            foreach (var node in nodes)
+            {
+                ClearCheck(node.Children);
+                node.IsChecked = false;
+            }
+        }
+
+        private void SetPropagateModeRecursive(ClassNode node, bool propagate)
+        {
+            node.PropagateCheckToChildren = propagate;
+            foreach (var child in node.Children)
+            {
+                SetPropagateModeRecursive(child, propagate);
             }
         }
 
@@ -211,8 +276,9 @@ namespace ClassDependencyVisualizer
                 return;
             }
 
-            var showSummary = ShowSammaryCheckBox.IsChecked ?? false;
-            var result = _filterManager.ProcessFilter(RootNodes, forward, backward, showSummary);
+            var displaySummary = ShowSummaryCheckBox.IsChecked ?? false;
+            var displayFieldAndMethod = ShowDisplayMethodFieldCheckBox.IsChecked ?? true;
+            var result = _filterManager.ProcessFilter(RootNodes, forward, backward, displaySummary, displayFieldAndMethod);
 
             if (!result.IsSuccess)
             {
@@ -289,7 +355,7 @@ namespace ClassDependencyVisualizer
 
         private ObservableCollection<ClassNode> BuildClassTree(List<string> classNames)
         {
-            var classNodes = ClassNode.BuildTree(classNames);
+            var classNodes = ClassNode.BuildTree(classNames, currentFilterMode);
             var allNode = new ClassNode { Name = "All", IsExpanded = true };
 
             foreach (var node in classNodes)
@@ -374,5 +440,19 @@ namespace ClassDependencyVisualizer
         public event PropertyChangedEventHandler PropertyChanged;
         private void OnPropertyChanged(string propertyName) =>
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
+
+    [ValueConversion(typeof(bool), typeof(Visibility))]
+    public class BoolToVisibilityConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            return (value is bool b && b) ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            return (value is Visibility v && v == Visibility.Visible);
+        }
     }
 }

@@ -18,15 +18,16 @@ namespace DependencyAnalyzer.PlantUml
         public void Generate(Dictionary<string, ClassDependency> classMap, string filePath, DistanceDisplaySetting displaySetting)
         {
             var displayClasses = GetDisplayClasses(classMap, displaySetting);
-            GenerateInternal(classMap, filePath, displayClasses, displaySetting?.RootName, displaySammary:displaySetting.DisplaySammary);
+            GenerateInternal(classMap, filePath, displayClasses, displaySetting?.RootName, displaySummary: displaySetting.DisplaySummary, displayFieldAndMethod: displaySetting.DisplayFieldAndMethod);
         }
 
         public void Generate(Dictionary<string, ClassDependency> classMap, string filePath, SelectionDisplaySetting displaySetting)
         {
             var displayClasses = GetDisplayClasses(classMap, displaySetting);
-            GenerateInternal(classMap, filePath, displayClasses, displaySammary:displaySetting.DisplaySammary);
+            GenerateInternal(classMap, filePath, displayClasses, displaySummary: displaySetting.DisplaySummary, displayFieldAndMethod: displaySetting.DisplayFieldAndMethod);
         }
-        private void GenerateInternal(Dictionary<string, ClassDependency> classMap, string filePath, HashSet<string> displayClasses, string rootClassName = null, bool displaySammary = false)
+
+        private void GenerateInternal(Dictionary<string, ClassDependency> classMap, string filePath, HashSet<string> displayClasses, string rootClassName = null, bool displaySummary = false, bool displayFieldAndMethod = true)
         {
             var sb = new StringBuilder();
             sb.AppendLine("@startuml");
@@ -61,7 +62,7 @@ namespace DependencyAnalyzer.PlantUml
                 nsTree.Add(parts[..^1], fullName);
             }
 
-            nsTree.Render(sb, classNameMap, classMap, rootClassName, displaySammary:displaySammary);
+            nsTree.Render(sb, classNameMap, classMap, rootClassName, displaySummary: displaySummary, displyaFieldAndMethod: displayFieldAndMethod);
 
             // 依存関係の出力
             foreach (var classEntry in classMap.Values)

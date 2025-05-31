@@ -4,6 +4,6 @@
              xmlns:local="clr-namespace:ClassDependencyVisualizer"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-         
+        <local:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>
     </Application.Resources>
 </Application>

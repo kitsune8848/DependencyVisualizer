@@ -10,12 +10,16 @@ namespace DependencyAnalyzer.DataStructure
     public class SelectionDisplaySetting: IDisplaySetting
     {
         public List<string> DisplayClassNames { get; private set; }
-        public bool DisplaySammary {  get; private set; }
+        public bool DisplaySummary { get; private set; }
 
-        public SelectionDisplaySetting(List<string> displayClassNames, bool displaySammary)
+        public bool DisplayFieldAndMethod { get; private set; }
+
+
+        public SelectionDisplaySetting(List<string> displayClassNames, bool displaySummary, bool displayFieldAndMethod)
         {
             DisplayClassNames = displayClassNames ?? new List<string>();
-            DisplaySammary = displaySammary;
+            DisplaySummary = displaySummary;
+            DisplayFieldAndMethod = displayFieldAndMethod;
         }
     }
 }

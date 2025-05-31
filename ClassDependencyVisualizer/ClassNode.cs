@@ -24,6 +24,7 @@ namespace ClassDependencyVisualizer
         public ClassNode Parent { get; set; }
 
         public ObservableCollection<ClassNode> Children { get; set; } = new ObservableCollection<ClassNode>();
+        public bool PropagateCheckToChildren { get; set; } = true;
 
         public bool IsChecked
         {
@@ -34,14 +35,20 @@ namespace ClassDependencyVisualizer
                 {
                     isChecked = value;
                     OnPropertyChanged();
-                    // 子にも反映
-                    foreach (var child in Children)
+
+                    if (PropagateCheckToChildren)
                     {
-                        child.IsChecked = value;
+                        foreach (var child in Children)
+                        {
+                            child.IsChecked = value;
+                        }
                     }
                 }
             }
         }
+
+
+
 
         public bool IsExpanded
         {
@@ -69,6 +76,20 @@ namespace ClassDependencyVisualizer
             }
         }
 
+        private bool isVisible = true;
+        public bool IsVisible
+        {
+            get => isVisible;
+            set
+            {
+                if (isVisible != value)
+                {
+                    isVisible = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
         /// <summary>
         /// ノードの階層パス（例: All.MyNamespace.MyClass）
         /// </summary>
@@ -80,7 +101,7 @@ namespace ClassDependencyVisualizer
         /// <summary>
         /// ドット区切りのフルネームリストをツリーに変換
         /// </summary>
-        public static ObservableCollection<ClassNode> BuildTree(IEnumerable<string> fullNames)
+        public static ObservableCollection<ClassNode> BuildTree(IEnumerable<string> fullNames, string filterMode)
         {
             var root = new ObservableCollection<ClassNode>();
 
@@ -98,7 +119,8 @@ namespace ClassDependencyVisualizer
                         existing = new ClassNode
                         {
                             Name = part,
-                            Parent = parent
+                            Parent = parent,
+                            PropagateCheckToChildren = filterMode=="Selection"
                         };
                         currentLevel.Add(existing);
                     }
@@ -111,48 +133,9 @@ namespace ClassDependencyVisualizer
             return root;
         }
 
-        /// <summary>
-        /// 検索語を含むノードをハイライトし、親を展開する
-        /// </summary>
-        public static void HighlightMatches(IEnumerable<ClassNode> nodes, string keyword)
-        {
-            foreach (var node in nodes)
-            {
-                node.IsHighlighted = node.Name.Contains(keyword, StringComparison.OrdinalIgnoreCase);
-
-                if (node.IsHighlighted)
-                {
-                    // 親をすべて展開
-                    var current = node.Parent;
-                    while (current != null)
-                    {
-                        current.IsExpanded = true;
-                        current = current.Parent;
-                    }
-                }
-
-                HighlightMatches(node.Children, keyword);
-            }
-        }
-
         public event PropertyChangedEventHandler PropertyChanged;
         protected void OnPropertyChanged([CallerMemberName] string propertyName = null) =>
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 
-    public class ClassNameSet
-    {
-        public List<String> Names { get; private set; } = new List<String>();
-
-        public ClassNameSet(List<string> names)
-        {
-            Names = names;
-        }
-
-        public static ClassNameSet Create(Dictionary<string, ClassDependency> classMap)
-        {
-            return new ClassNameSet(classMap.Keys.ToList());
-
-        }
-    }
 }

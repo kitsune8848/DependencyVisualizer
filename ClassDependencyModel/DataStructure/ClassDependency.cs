@@ -18,7 +18,7 @@ namespace DependencyAnalyzer.DataStructure
         // 下段：操作（メソッド）一覧
         public List<string> Methods { get; set; } = new();
 
-        public string Sammary { get; set; }
+        public string summary { get; set; }
     }
 
 }

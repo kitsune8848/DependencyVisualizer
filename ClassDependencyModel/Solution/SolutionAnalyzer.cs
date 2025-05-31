@@ -24,14 +24,14 @@ namespace DependencyAnalyzer.SolutionAna
         {
             msbuildService.Register();
 
-            var solution = await loader.LoadSolutionAsync(solutionPath);
+            var solution = await loader.LoadSolutionAsync(solutionPath).ConfigureAwait(false);
 
             var classMap = new Dictionary<string, ClassDependency>();
             var depMap = new Dictionary<string, HashSet<string>>();
 
             foreach (var project in solution.Projects)
             {
-                await projectAnalyzer.AnalyzeAsync(project, classMap, depMap);
+                await projectAnalyzer.AnalyzeAsync(project, classMap, depMap).ConfigureAwait(false);
             }
 
             linker.Link(classMap, depMap);

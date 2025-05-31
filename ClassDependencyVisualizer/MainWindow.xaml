@@ -8,6 +8,7 @@
         Title="Dependency Visualizer" Height="650" Width="1000"
         Background="#1e1e1e" Foreground="#ffffff"
         FontFamily="Segoe UI" FontSize="14">
+    
 
     <DockPanel Margin="10">
 
@@ -20,7 +21,7 @@
 
             <!-- ファイル取得中メッセージ -->
             <TextBlock x:Name="LoadingMessageText"
-                   Text="ファイル取得中..."
+                   Text="ファイルを選択してください"
                    FontSize="12"
                    Foreground="#00afff"
                    VerticalAlignment="Center"
@@ -143,11 +144,16 @@
                 <Border Grid.Column="1" Background="#2d2d30" CornerRadius="8" Padding="10">
                     <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                         <TextBlock Text="詳細オプション：" VerticalAlignment="Center"/>
-                        <CheckBox x:Name="ShowSammaryCheckBox"
-                      Content="Sammary表示"
-                      Margin="20,0,0,0"
-                      VerticalAlignment="Center"
-                      Foreground="White"/>
+                        <CheckBox x:Name="ShowSummaryCheckBox"
+                              Content="Summary 表示"
+                              Margin="20,0,0,0"
+                              VerticalAlignment="Center"
+                              Foreground="White"/>
+                        <CheckBox x:Name="ShowDisplayMethodFieldCheckBox"
+                              Content="Method/Field 表示"
+                              Margin="20,0,0,0"
+                              VerticalAlignment="Center"
+                              Foreground="White"/>
                     </StackPanel>
                 </Border>
             </Grid>
@@ -228,12 +234,13 @@
                     <TreeView.ItemContainerStyle>
                         <Style TargetType="TreeViewItem">
                             <Setter Property="IsExpanded" Value="{Binding IsExpanded, Mode=TwoWay}" />
+                            <Setter Property="Visibility" Value="{Binding IsVisible, Converter={StaticResource BoolToVisibilityConverter}}" />
                         </Style>
                     </TreeView.ItemContainerStyle>
 
                     <TreeView.Resources>
                         <HierarchicalDataTemplate DataType="{x:Type local:ClassNode}" ItemsSource="{Binding Children}">
-                            <CheckBox IsChecked="{Binding IsChecked, Mode=TwoWay}" Margin="0,0,5,0" VerticalAlignment="Center">
+                            <CheckBox IsChecked="{Binding IsChecked, Mode=TwoWay}" Margin="0,0,5,0" VerticalAlignment="Center" Checked="ClassNodeCheckBox_Checked">
                                 <StackPanel Orientation="Horizontal">
                                     <!-- TextBlock のみ別途スタイル適用 -->
                                     <TextBlock Text="{Binding Name}" VerticalAlignment="Center">
