@@ -529,9 +529,21 @@ namespace DependencyAnalyzer.SolutionAna
         /// <returns>除外すべき場合true</returns>
         private static bool IsSystemTypeToExclude(string typeName)
         {
+            // 依存関係として含めたい例外リスト
+            var allowedPrefixes = new[]
+            {
+                "System.Collections.Generic.List",
+                "System.Collections.Generic.Dictionary",
+                "System.Collections.Generic.IEnumerable",
+                "System.Collections.Generic.ICollection",
+                "System.Collections.Generic.IList",
+                "System.Collections.Generic.HashSet",
+                "System.Threading.Tasks.Task"
+            };
+
+            // System名前空間で、例外リストに含まれないものは除外
             return typeName.StartsWith("System.") &&
-                   !typeName.StartsWith("System.Collections.Generic.Dictionary") &&
-                   !typeName.StartsWith("System.Collections.Generic.List");
+                   !allowedPrefixes.Any(prefix => typeName.StartsWith(prefix));
         }
 
         /// <summary>
